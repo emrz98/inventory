@@ -1,5 +1,13 @@
 package com.emrz.inventory.service;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.secretsmanager.AWSSecretsManager;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.emrz.inventory.domain.Product;
 import com.emrz.inventory.dto.request.CreateProductDto;
 import com.emrz.inventory.dto.request.ProductDto;
@@ -9,6 +17,7 @@ import com.emrz.inventory.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +30,28 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     ProductRepository productRepository;
 
+    @Value("${db.pass}")
+    String testValue;
+
     @Override
     public ProductDto createProduct(CreateProductDto createProductDto) {
+        System.out.println(testValue);
+        AWSCredentials credentials = new BasicAWSCredentials(
+                "",
+                ""
+        );
+        AmazonS3 s3client = AmazonS3ClientBuilder
+                .standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion(Regions.US_EAST_2)
+                .build();
+        String bucketName = "my-bucket";
+
+        if(s3client.doesBucketExistV2(bucketName)){
+            logger.info("Bucket name is not available."
+                    + " Try again with a different Bucket name.");
+        }
+        s3client.createBucket(bucketName);
 
         Product product = new Product();
         product.setId(null);
