@@ -3,9 +3,12 @@ package com.emrz.inventory.service;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3DataSource;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.emrz.inventory.domain.Product;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,24 +39,17 @@ public class ProductServiceImpl implements ProductService{
     String testValue;
 
     @Override
-    public ProductDto createProduct(CreateProductDto createProductDto) {
+    public ProductDto createProduct(CreateProductDto createProductDto) throws IOException {
         System.out.println(testValue);
-        AWSCredentials credentials = new BasicAWSCredentials(
-                "",
-                ""
-        );
         AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                 .withRegion(Regions.US_EAST_2)
                 .build();
-        String bucketName = "my-bucket";
-
-        if(s3client.doesBucketExistV2(bucketName)){
-            logger.info("Bucket name is not available."
-                    + " Try again with a different Bucket name.");
-        }
-        s3client.createBucket(bucketName);
+        File testFile = new File("hola.txt");
+        testFile.createNewFile();
+        PutObjectRequest putObjectRequest = new PutObjectRequest("emrz-inventory-test", "duno",testFile );
+        s3client.putObject(putObjectRequest);
 
         Product product = new Product();
         product.setId(null);

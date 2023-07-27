@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("product")
 public class ProductController {
@@ -18,7 +20,7 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping(value = "create")
-    public ResponseEntity<?> createProduct(@RequestBody CreateProductDto createProductDto){
+    public ResponseEntity<?> createProduct(@RequestBody CreateProductDto createProductDto) throws IOException {
         ProductDto productDto = productService.createProduct(createProductDto);
         return ResponseEntity.ok().body(productDto);
     }
