@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService{
@@ -35,26 +36,23 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     ProductRepository productRepository;
 
-    @Value("${db.pass}")
-    String testValue;
 
     @Override
     public ProductDto createProduct(CreateProductDto createProductDto) throws IOException {
-        System.out.println(testValue);
-        AmazonS3 s3client = AmazonS3ClientBuilder
+        /*AmazonS3 s3client = AmazonS3ClientBuilder
                 .standard()
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                 .withRegion(Regions.US_EAST_2)
                 .build();
         File testFile = new File("hola.txt");
         testFile.createNewFile();
-        PutObjectRequest putObjectRequest = new PutObjectRequest("emrz-inventory-test", "duno",testFile );
-        s3client.putObject(putObjectRequest);
+        PutObjectRequest putObjectRequest = new PutObjectRequest("emrz-invento", "duno",testFile );
+        s3client.putObject(putObjectRequest);*/
 
         Product product = new Product();
         product.setId(null);
         product.setPrice(createProductDto.getPrice());
-        product.setName(createProductDto.getName());
+        product.setName(createProductDto  .getName());
         try{
             Product productSaved = productRepository.save(product);
             logger.info(String.format("Producto con id: %s guardado correctamente", productSaved.getId()));
@@ -95,7 +93,8 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public List<ProductDto> getAllProducts() {
-        return null;
+        return productRepository.findAll()
+                .stream().map(ProductServiceImpl::productEntityToDto).collect(Collectors.toList());
     }
 
     @Override
@@ -103,7 +102,7 @@ public class ProductServiceImpl implements ProductService{
         return null;
     }
 
-    private ProductDto productEntityToDto(Product product){
+    private static ProductDto productEntityToDto(Product product){
         ProductDto productDto = new ProductDto();
         productDto.setName(product.getName());
         productDto.setPrice(product.getPrice());
